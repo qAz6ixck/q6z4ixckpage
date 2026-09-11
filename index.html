@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>q6z4ixck</title>
+  <style>
+    /* ── Design tokens ─────────────────────────────── */
+    :root {
+      --c1: #a2476f;
+      --c2: #a51d58;
+      --c5: #c74887;
+      --c7: #be648b;
+      --c8: #a65268;
+    }
+
+    /* ── Light mode (default) ──────────────────────── */
+    [data-theme="light"] {
+      --bg-main: #ffffff;
+      --bg-canvas: #faf8f9;
+      --bg-card: rgba(255, 255, 255, 0.82);
+      --border-card: rgba(162, 71, 111, 0.18);
+      --border-hover: rgba(199, 72, 135, 0.45);
+      --text-main: #1a0d14;
+      --text-sub: rgba(26, 13, 20, 0.50);
+      --text-muted: rgba(26, 13, 20, 0.38);
+      --text-card: #1a0d14;
+      --eyebrow-col: var(--c8);
+      --eyebrow-brd: rgba(162, 71, 111, 0.30);
+      --footer-col: rgba(26, 13, 20, 0.25);
+      /* kinetic grid colours */
+      --grid-bg1: #fdf9fb;
+      --grid-bg2: #f8f2f5;
+      --grid-dot-a: 0.07;
+      --grid-line-r: 162;
+      --grid-line-g: 71;
+      --grid-line-b: 111;
+      --grid-line-base-a: 0.12;
+      --grid-line-active-a: 0.80;
+      --grid-node-r: 199;
+      --grid-node-g: 72;
+      --grid-node-b: 135;
+      --grid-ripple: 199, 72, 135;
+      /* toggle */
+      --toggle-bg: rgba(162, 71, 111, 0.10);
+      --toggle-icon: var(--c1);
+      /* icon filter: images are white, invert to dark for light mode */
+      --icon-filter: invert(1) brightness(0) opacity(0.55);
+    }
+
+    /* ── Dark mode ─────────────────────────────────── */
+    [data-theme="dark"] {
+      --bg-main: #0e0a0d;
+      --bg-canvas: #0e0a0d;
+      --bg-card: rgba(14, 10, 13, 0.72);
+      --border-card: rgba(162, 71, 111, 0.22);
+      --border-hover: rgba(199, 72, 135, 0.45);
+      --text-main: #ffffff;
+      --text-sub: rgba(255, 255, 255, 0.50);
+      --text-muted: rgba(255, 255, 255, 0.35);
+      --text-card: #ffffff;
+      --eyebrow-col: var(--c7);
+      --eyebrow-brd: rgba(162, 71, 111, 0.35);
+      --footer-col: rgba(255, 255, 255, 0.20);
+      /* kinetic grid colours */
+      --grid-bg1: #100810;
+      --grid-bg2: #0a060a;
+      --grid-dot-a: 0.04;
+      --grid-line-r: 255;
+      --grid-line-g: 255;
+      --grid-line-b: 255;
+      --grid-line-base-a: 0.10;
+      --grid-line-active-a: 0.85;
+      --grid-node-r: 190;
+      --grid-node-g: 100;
+      --grid-node-b: 139;
+      --grid-ripple: 199, 72, 135;
+      /* toggle */
+      --toggle-bg: rgba(255, 255, 255, 0.08);
+      --toggle-icon: rgba(255, 255, 255, 0.70);
+      /* icon filter: white images stay white in dark mode */
+      --icon-filter: none;
+    }
+
+    /* ── Background image — both modes ──────────────────*/
+    /* Light mode: artwork with moon and sea */
+    [data-theme="light"] body {
+      background: #eceae4;
+    }
+
+    [data-theme="light"] body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image: url('bg-light.jpg');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      opacity: 0.85;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Dark mode: same photo, richer opacity */
+    [data-theme="dark"] body {
+      background: #0e0a0d;
+    }
+
+    [data-theme="dark"] body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image: url('bg-dark.jpg');
+      background-size: cover;
+      background-position: center top;
+      background-repeat: no-repeat;
+      opacity: 0.80;
+      transition: opacity 0.4s ease;
+    }
+
+    /* ── Reset ──────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.4s ease, color 0.4s ease;
+    }
+
+    /* ── Kinetic canvas ─────────────────────────────── */
+    #kinetic-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    /* ── Theme toggle ───────────────────────────────── */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+      background: var(--toggle-bg);
+      border: 1px solid var(--border-card);
+      border-radius: 999px;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.08);
+    }
+
+    .theme-toggle svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--toggle-icon);
+      transition: fill 0.3s ease;
+    }
+
+    /* show sun in dark, moon in light */
+    [data-theme="light"] .icon-sun {
+      display: none;
+    }
+
+    [data-theme="light"] .icon-moon {
+      display: block;
+    }
+
+    [data-theme="dark"] .icon-sun {
+      display: block;
+    }
+
+    [data-theme="dark"] .icon-moon {
+      display: none;
+    }
+
+    /* ── Layout ─────────────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 48px 24px;
+      gap: 40px;
+    }
+
+    /* ── Header ─────────────────────────────────────── */
+    .header {
+      text-align: center;
+    }
+
+    .header-eyebrow {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--eyebrow-col);
+      border: 1px solid var(--eyebrow-brd);
+      border-radius: 999px;
+      padding: 4px 14px;
+      margin-bottom: 20px;
+      transition: color 0.4s ease, border-color 0.4s ease;
+    }
+
+    .header-title {
+      font-size: clamp(2.4rem, 8vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--text-main);
+      transition: color 0.4s ease;
+    }
+
+    .header-title strong {
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--c7) 0%, var(--c5) 50%, var(--c2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-sub {
+      margin-top: 14px;
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      letter-spacing: 0.04em;
+      transition: color 0.4s ease;
+    }
+
+    /* ── Cards grid ─────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* ── Beam card ──────────────────────────────────── */
+    .beam-card {
+      position: relative;
+      border-radius: 18px;
+      border: 1px solid var(--border-card);
+      background: var(--bg-card);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 22px 20px;
+      isolation: isolate;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text-card);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.22s ease, border-color 0.22s ease,
+        background 0.4s ease, color 0.4s ease;
+    }
+
+    .beam-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-hover);
+    }
+
+    /* Beam ring */
+    .beam-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 18px;
+      background: conic-gradient(from var(--beam-angle, 0deg),
+          transparent 0deg,
+          rgba(162, 71, 111, 0.04) 18deg,
+          rgba(162, 71, 111, 0.55) 56deg,
+          rgba(190, 100, 139, 1) 60deg,
+          transparent 63deg,
+          transparent 198deg,
+          rgba(199, 72, 135, 0.04) 216deg,
+          rgba(199, 72, 135, 0.55) 254deg,
+          rgba(255, 180, 220, 1) 258deg,
+          transparent 261deg,
+          transparent 360deg);
+      padding: 2px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Glow */
+    .beam-card::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 18px;
+      background: conic-gradient(from var(--beam-angle, 0deg),
+          transparent 0deg,
+          rgba(162, 71, 111, 0.04) 18deg,
+          rgba(199, 72, 135, 0.55) 56deg,
+          rgba(190, 100, 139, 0.9) 60deg,
+          transparent 63deg,
+          transparent 360deg);
+      filter: blur(14px);
+      opacity: 0.30;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ── Card icon (image) ──────────────────────────── */
+    .card-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(162, 71, 111, 0.10);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .card-icon img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+      filter: var(--icon-filter);
+      transition: filter 0.4s ease;
+    }
+
+    /* Spotify icon is slightly larger (circle shape) */
+    .card-sp .card-icon img {
+      width: 28px;
+      height: 28px;
+    }
+
+    /* ── Card text ──────────────────────────────────── */
+    .card-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color 0.4s ease;
+    }
+
+    .card-name {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-card);
+      line-height: 1.3;
+      transition: color 0.4s ease;
+    }
+
+    /* ── Footer ─────────────────────────────────────── */
+    .footer {
+      font-size: 11px;
+      color: var(--footer-col);
+      letter-spacing: 0.08em;
+      transition: color 0.4s ease;
+    }
+
+    /* ── Responsive ─────────────────────────────────── */
+    @media (max-width: 400px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── Entrance animations ────────────────────────── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      animation: fadeUp 0.7s ease both;
+    }
+
+    .cards-grid {
+      animation: fadeUp 0.7s 0.15s ease both;
+    }
+
+
+    .footer {
+      animation: fadeUp 0.7s 0.30s ease both;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <!-- Theme toggle button -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <!-- Moon icon (shown in light mode → click to go dark) -->
+    <svg class="icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+    </svg>
+    <!-- Sun icon (shown in dark mode → click to go light) -->
+    <svg class="icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" stroke-width="2" stroke="currentColor" stroke-linecap="round" />
+      <line x1="12" y1="21" x2="12" y2="23" stroke-width="2" stroke="currentColor" stroke-linecap="round" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke-width="2" stroke="currentColor" stroke-linecap="round" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke-width="2" stroke="currentColor" stroke-linecap="round" />
+      <line x1="1" y1="12" x2="3" y2="12" stroke-width="2" stroke="currentColor" stroke-linecap="round" />
+      <line x1="21" y1="12" x2="23" y2="12" stroke-width="2" stroke="currentColor" stroke-linecap="round" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2" stroke="currentColor" stroke-linecap="round" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2" stroke="currentColor" stroke-linecap="round" />
+    </svg>
+  </button>
+
+  <!-- Kinetic grid canvas -->
+  <canvas id="kinetic-canvas"></canvas>
+
+  <div class="page">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-eyebrow">It's me q6z4ixck</div>
+      <h1 class="header-title"><strong>q6z4ixck</strong></h1>
+      <p class="header-sub">Something* about me</p>
+    </header>
+
+    <!-- Social cards -->
+    <div class="cards-grid">
+
+      <!-- Instagram -->
+      <a class="beam-card card-ig" href="https://www.instagram.com/agrippina_q6z4ixckyliqueurarsz/" target="_blank"
+        rel="noopener noreferrer">
+        <div class="card-icon">
+          <img src="icon-instagram.png" alt="Instagram" />
+        </div>
+        <span class="card-label">Instagram</span>
+        <span class="card-name">@agrippina_<br>q6z4ixck</span>
+      </a>
+
+      <!-- YouTube -->
+      <a class="beam-card card-yt" href="https://www.youtube.com/channel/UCrFrRYYwsyZPkkNypLpqv1w" target="_blank"
+        rel="noopener noreferrer">
+        <div class="card-icon">
+          <img src="icon-youtube.png" alt="YouTube" />
+        </div>
+        <span class="card-label">YouTube</span>
+        <span class="card-name">q6z4ixck<br>channel</span>
+      </a>
+
+      <!-- Apple Music -->
+      <a class="beam-card card-am" href="https://music.apple.com/profile/q6z4ixckwatx" target="_blank"
+        rel="noopener noreferrer">
+        <div class="card-icon">
+          <img src="icon-applemusic.png" alt="Apple Music" />
+        </div>
+        <span class="card-label">Apple Music</span>
+        <span class="card-name">q6z4ixckwatx</span>
+      </a>
+
+      <!-- Spotify -->
+      <a class="beam-card card-sp" href="https://open.spotify.com/user/31ikfl7je2cbnolqsgnuvaf5fi7m?si=fc3dabaa933a44c3"
+        target="_blank" rel="noopener noreferrer">
+        <div class="card-icon">
+          <img src="icon-spotify.png" alt="Spotify" />
+        </div>
+        <span class="card-label">Spotify</span>
+        <span class="card-name">q6z4ixck<br>playlist</span>
+      </a>
+
+    </div>
+
+    <footer class="footer">q6z4ixck &nbsp;·&nbsp; 2026</footer>
+
+  </div>
+
+  <script>
+    /* ─────────────────────────────────────────────────────────────────────────
+       Theme toggle — faithful Vanilla JS port of
+       react-theme-switch-animation  (CIRCLE mode)
+       https://github.com/MinhOmega/react-theme-switch-animation
+
+       ThemeAnimationType.CIRCLE:
+         • clip-path: circle(0px at x y)  →  circle(maxRadius at x y)
+         • duration : 750ms  (library default)
+         • easing   : ease-in-out  (library default for CIRCLE)
+         • engine   : View Transitions API  (document.startViewTransition)
+         • fallback : instant switch on unsupported browsers
+    ───────────────────────────────────────────────────────────────────────── */
+    const html = document.documentElement;
+    const btn = document.getElementById('themeToggle');
+
+    const saved = localStorage.getItem('theme');
+    if (saved) html.setAttribute('data-theme', saved);
+
+    /* ── Inject base view-transition reset (injectBaseStyles equivalent) ─── */
+    (() => {
+      const id = 'theme-switch-base-style';
+      if (document.getElementById(id)) return;
+      const s = document.createElement('style');
+      s.id = id;
+      /* Disable default cross-fade; we'll drive the animation ourselves */
+      s.textContent = `
+        ::view-transition-old(root),
+        ::view-transition-new(root) {
+          animation: none;
+          mix-blend-mode: normal;
+        }
+      `;
+      document.head.appendChild(s);
+    })();
+
+    /* ── Build CIRCLE clip-path CSS  ─────────────────────────────────────── */
+    function buildCircleCSS(x, y, duration) {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      /* Radius must reach the farthest corner from the origin */
+      const maxR = Math.ceil(Math.hypot(Math.max(x, W - x), Math.max(y, H - y)));
+
+      return `
+        @keyframes theme-circle-clip {
+          from { clip-path: circle(0px at ${x}px ${y}px); }
+          to   { clip-path: circle(${maxR}px at ${x}px ${y}px); }
+        }
+
+        /* New snapshot: circle grows from button centre */
+        ::view-transition-new(root) {
+          animation: theme-circle-clip ${duration}ms ease-in-out both;
+        }
+
+        /* Old snapshot: stays still underneath */
+        ::view-transition-old(root) {
+          animation: none;
+          z-index: -1;
+        }
+      `;
+    }
+
+    /* ── Main toggle ─────────────────────────────────────────────────────── */
+    let styleEl = null;
+    let busy = false;
+
+    async function toggleTheme(x, y) {
+      if (busy) return;
+
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      const duration = 750; /* ThemeAnimationType.CIRCLE default in library */
+
+      /* Fallback for browsers without View Transitions (e.g. Firefox) */
+      if (!document.startViewTransition) {
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        return;
+      }
+
+      busy = true;
+      styleEl?.remove();
+
+      styleEl = document.createElement('style');
+      styleEl.id = 'theme-switch-style';
+      styleEl.textContent = buildCircleCSS(x, y, duration);
+      document.head.appendChild(styleEl);
+
+      /* startViewTransition captures old snapshot, runs callback (flushSync
+         equivalent), then paints new snapshot — animation plays between them */
+      const vt = document.startViewTransition(() => {
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+      });
+
+      try {
+        await vt.finished;
+      } finally {
+        styleEl?.remove();
+        styleEl = null;
+        busy = false;
+      }
+    }
+
+    btn.addEventListener('click', () => {
+      const r = btn.getBoundingClientRect();
+      toggleTheme(
+        Math.round(r.left + r.width / 2),
+        Math.round(r.top + r.height / 2)
+      );
+    });
+
+    /* ── Kinetic grid (vanilla JS) ────────────────── */
+    (() => {
+      const canvas = document.getElementById('kinetic-canvas');
+      const ctx = canvas.getContext('2d');
+
+      const CELL_SIZE = 55;
+      const INFLUENCE_R = 260;
+      const MAX_WARP = 22;
+      const DOT_SPACING = 28;
+      const LERP_SPEED = 0.08;
+      const NODE_BASE_R = 1.8;
+      const NODE_ACTIVE_R = 3.2;
+
+      let W = 0, H = 0;
+      const mouse = { x: -9999, y: -9999 };
+      const target = { x: -9999, y: -9999 };
+      const ripples = [];
+
+      function getTheme() {
+        return document.documentElement.getAttribute('data-theme') === 'dark'
+          ? 'dark' : 'light';
+      }
+
+      const THEMES = {
+        light: {
+          bg1: '#fdf9fb', bg2: '#f8f2f5',
+          dotA: 0.07,
+          lineBase: { r: 162, g: 71, b: 111, a: 0.12 },
+          lineActive: { r: 162, g: 71, b: 111, a: 0.80 },
+          nodeBase: { r: 162, g: 71, b: 111, a: 0.18 },
+          nodeActive: { r: 199, g: 72, b: 135, a: 1.0 },
+          glow: '199,72,135',
+          ripple: '162,71,111',
+        },
+        dark: {
+          bg1: '#100810', bg2: '#0a060a',
+          dotA: 0.04,
+          lineBase: { r: 255, g: 255, b: 255, a: 0.10 },
+          lineActive: { r: 199, g: 72, b: 135, a: 0.85 },
+          nodeBase: { r: 255, g: 255, b: 255, a: 0.15 },
+          nodeActive: { r: 190, g: 100, b: 139, a: 1.0 },
+          glow: '199,72,135',
+          ripple: '199,72,135',
+        },
+      };
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      window.addEventListener('mousemove', e => { target.x = e.clientX; target.y = e.clientY; });
+      window.addEventListener('touchmove', e => {
+        target.x = e.touches[0].clientX;
+        target.y = e.touches[0].clientY;
+      }, { passive: true });
+      window.addEventListener('click', e => {
+        ripples.push({ x: e.clientX, y: e.clientY, radius: 0, opacity: 1, born: performance.now() });
+      });
+
+      function lerpN(a, b, t) { return a + (b - a) * t; }
+      function lerpColor(base, active, t) {
+        return `rgba(${Math.round(lerpN(base.r, active.r, t))},${Math.round(lerpN(base.g, active.g, t))},${Math.round(lerpN(base.b, active.b, t))},${lerpN(base.a, active.a, t).toFixed(3)})`;
+      }
+      function smoothstep(x) { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); }
+
+      function getWarped(gx, gy, col, row, cols, rows) {
+        const em = 1.5;
+        const cPin = Math.min(col / em, (cols - 1 - col) / em, 1);
+        const rPin = Math.min(row / em, (rows - 1 - row) / em, 1);
+        const pin = cPin * cPin * rPin * rPin;
+
+        const dx = gx - mouse.x, dy = gy - mouse.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const prox = Math.max(0, 1 - dist / INFLUENCE_R) * pin;
+
+        let rx = 0, ry = 0;
+        for (const r of ripples) {
+          const rdx = gx - r.x, rdy = gy - r.y;
+          const rd = Math.sqrt(rdx * rdx + rdy * rdy);
+          const ww = 55, diff = rd - r.radius;
+          if (Math.abs(diff) < ww) {
+            const str = (1 - Math.abs(diff) / ww) * r.opacity * 18 * pin;
+            const ang = Math.atan2(rdy, rdx);
+            const sgn = diff < 0 ? -1 : 1;
+            rx += Math.cos(ang) * str * sgn * -1;
+            ry += Math.sin(ang) * str * sgn * -1;
+          }
+        }
+
+        if (dist < INFLUENCE_R && dist > 0 && pin > 0) {
+          const t = dist / INFLUENCE_R;
+          const e = t < 0.01 ? 0 : (1 - t) * (1 - t) * Math.min(1, dist / 60);
+          const w = e * MAX_WARP * pin;
+          const a = Math.atan2(dy, dx);
+          return { pt: { x: gx - Math.cos(a) * w + rx, y: gy - Math.sin(a) * w + ry }, prox };
+        }
+        return { pt: { x: gx + rx, y: gy + ry }, prox };
+      }
+
+      function draw(now) {
+        const T = THEMES[getTheme()];
+
+        ctx.clearRect(0, 0, W, H);
+
+        if (getTheme() === 'dark') {
+          /* Semi-transparent fill so bg-dark.jpg bleeds through */
+          ctx.fillStyle = 'rgba(10,6,10,0.55)';
+          ctx.fillRect(0, 0, W, H);
+        } else {
+          /* Subtle light veil so bg-light.jpg illustration remains clear */
+          ctx.fillStyle = 'rgba(255,255,255,0.25)';
+          ctx.fillRect(0, 0, W, H);
+        }
+
+        ctx.fillStyle = `rgba(80,20,50,${T.dotA})`;
+        for (let x = DOT_SPACING / 2; x < W; x += DOT_SPACING)
+          for (let y = DOT_SPACING / 2; y < H; y += DOT_SPACING) {
+            ctx.beginPath(); ctx.arc(x, y, 0.6, 0, Math.PI * 2); ctx.fill();
+          }
+
+        for (let i = ripples.length - 1; i >= 0; i--) {
+          const r = ripples[i], age = (now - r.born) / 1000;
+          r.radius = Math.max(0, age * 380);
+          r.opacity = Math.max(0, 1 - age * 1.2);
+          if (r.opacity <= 0) ripples.splice(i, 1);
+        }
+
+        const cols = Math.max(2, Math.ceil(W / CELL_SIZE)) + 1;
+        const rows = Math.max(2, Math.ceil(H / CELL_SIZE)) + 1;
+        const cW = W / (cols - 1), cH = H / (rows - 1);
+
+        const pts = Array.from({ length: rows }, () => new Array(cols));
+        const prox = Array.from({ length: rows }, () => new Array(cols));
+        for (let r = 0; r < rows; r++)
+          for (let c = 0; c < cols; c++) {
+            const { pt, prox: p } = getWarped(c * cW, r * cH, c, r, cols, rows);
+            pts[r][c] = pt; prox[r][c] = p;
+          }
+
+        const drawSeg = (p1, p2, pr1, pr2) => {
+          const t = smoothstep((pr1 + pr2) / 2);
+          ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = lerpColor(T.lineBase, T.lineActive, t);
+          ctx.lineWidth = lerpN(0.7, 1.4, t); ctx.stroke();
+        };
+        ctx.lineCap = 'butt';
+        for (let r = 0; r < rows; r++) for (let c = 0; c < cols - 1; c++) drawSeg(pts[r][c], pts[r][c + 1], prox[r][c], prox[r][c + 1]);
+        for (let c = 0; c < cols; c++) for (let r = 0; r < rows - 1; r++) drawSeg(pts[r][c], pts[r + 1][c], prox[r][c], prox[r + 1][c]);
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const p = pts[r][c], pr = prox[r][c], t = smoothstep(pr);
+            const rad = lerpN(NODE_BASE_R, NODE_ACTIVE_R, t);
+            if (t > 0.3) {
+              const gR = rad + lerpN(0, 7, (t - 0.3) / 0.7);
+              const grd = ctx.createRadialGradient(p.x, p.y, rad * 0.5, p.x, p.y, gR);
+              grd.addColorStop(0, `rgba(${T.glow},${(t * 0.25).toFixed(3)})`);
+              grd.addColorStop(1, `rgba(${T.glow},0)`);
+              ctx.beginPath(); ctx.arc(p.x, p.y, gR, 0, Math.PI * 2);
+              ctx.fillStyle = grd; ctx.fill();
+            }
+            ctx.beginPath(); ctx.arc(p.x, p.y, rad, 0, Math.PI * 2);
+            ctx.fillStyle = lerpColor(T.nodeBase, T.nodeActive, t);
+            ctx.fill();
+          }
+        }
+
+        for (const r of ripples) {
+          ctx.beginPath(); ctx.arc(r.x, r.y, Math.max(0, r.radius), 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(${T.ripple},${(r.opacity * 0.22).toFixed(3)})`;
+          ctx.lineWidth = 1.5; ctx.stroke();
+        }
+      }
+
+      function loop(now) {
+        mouse.x = lerpN(mouse.x, target.x, LERP_SPEED);
+        mouse.y = lerpN(mouse.y, target.y, LERP_SPEED);
+        draw(now);
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    })();
+
+    /* ── Border beam animation ────────────────────── */
+    (() => {
+      const cards = Array.from(document.querySelectorAll('.beam-card'));
+      const speeds = [42, 38, 46, 40];
+      const angles = cards.map((_, i) => ((i * 137.508) % 360));
+      let hovered = -1;
+
+      cards.forEach((card, i) => {
+        card.addEventListener('pointerenter', () => { hovered = i; });
+        card.addEventListener('pointerleave', () => { hovered = -1; });
+      });
+
+      let last = 0;
+      function tick(now) {
+        const dt = Math.min((now - (last || now)) / 1000, 0.05);
+        last = now;
+        cards.forEach((card, i) => {
+          angles[i] = (angles[i] + (hovered === i ? 220 : speeds[i]) * dt) % 360;
+          card.style.setProperty('--beam-angle', `${angles[i].toFixed(2)}deg`);
+        });
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+
+</html>
